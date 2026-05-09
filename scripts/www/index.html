@@ -4605,29 +4605,29 @@
 
             // 音效映射表
             const SFX_MAP = {
-                click: 'noise/kick.mp3',
-                success: 'noise/success.mp3',
-                failed: 'noise/failed.mp3',
-                choose: 'noise/kick.mp3', // 统一使用kick音效
-                warning: 'noise/success.mp3',  // 降低警告噪音，使用短促音
-                kick: 'noise/kick.mp3',
-                de_kick: 'noise/kick.mp3',
+                click: 'assets/audio/noise/kick.mp3',
+                success: 'assets/audio/noise/success.mp3',
+                failed: 'assets/audio/noise/failed.mp3',
+                choose: 'assets/audio/noise/kick.mp3',
+                warning: 'assets/audio/noise/success.mp3',
+                kick: 'assets/audio/noise/kick.mp3',
+                de_kick: 'assets/audio/noise/kick.mp3',
             };
             // 角色专属音效映射
             const CHAR_SFX = {
-                alan: { prefix: 'sound/Alanchen/', sounds: ['cough','drink','eat','sigh'] },
-                chenshuo: { prefix: 'sound/chenshuo/', sounds: ['all'] },
-                sunsheng: { prefix: 'sound/sunsheng/', sounds: ['cough','crazy laugh','drink','eat','sigh1','sigh2'] },
-                xinyue: { prefix: 'sound/xinyue/', sounds: ['cough','crazy laugh','drink','eat','sigh'] },
+                alan: { prefix: 'assets/audio/sound/Alanchen/', sounds: ['cough','drink','eat','sigh'] },
+                chenshuo: { prefix: 'assets/audio/sound/chenshuo/', sounds: ['all'] },
+                sunsheng: { prefix: 'assets/audio/sound/sunsheng/', sounds: ['cough','crazy laugh','drink','eat','sigh1','sigh2'] },
+                xinyue: { prefix: 'assets/audio/sound/xinyue/', sounds: ['cough','crazy laugh','drink','eat','sigh'] },
             };
             // BGM映射 - 主界面使用Background Music，局内使用gamebackground
             const BGM_MAP = {
-                start: 'music/Background Music.mp3',
-                game: 'music/gamebackground.mp3',
-                gacha: 'music/Background Music.mp3',
-                shop: 'music/Background Music.mp3',
-                prep: 'music/Background Music.mp3',
-                default: 'music/Background Music.mp3',
+                start: 'assets/audio/music/Background Music.mp3',
+                game: 'assets/audio/music/gamebackground.mp3',
+                gacha: 'assets/audio/music/Background Music.mp3',
+                shop: 'assets/audio/music/Background Music.mp3',
+                prep: 'assets/audio/music/Background Music.mp3',
+                default: 'assets/audio/music/Background Music.mp3',
             };
 
             let audioUnlocked = false;
@@ -9624,18 +9624,18 @@
                     // 单抽
                     const result = results[0];
                     if (result.star >= 5) {
-                        videoSrc = 'MV/choose/one/gold.mp4';
+                        videoSrc = 'assets/video/choose/one/gold.mp4';
                     } else if (result.star >= 4) {
-                        videoSrc = 'MV/choose/one/purple.mp4';
+                        videoSrc = 'assets/video/choose/one/purple.mp4';
                     } else {
-                        videoSrc = 'MV/choose/one/blue.mp4';
+                        videoSrc = 'assets/video/choose/one/blue.mp4';
                     }
                 } else {
                     // 十连
                     if (hasGold) {
-                        videoSrc = 'MV/choose/ten/gold.mp4';
+                        videoSrc = 'assets/video/choose/ten/gold.mp4';
                     } else if (hasPurple) {
-                        videoSrc = 'MV/choose/ten/purple.mp4';
+                        videoSrc = 'assets/video/choose/ten/purple.mp4';
                     }
                 }
                 
@@ -10857,7 +10857,7 @@
                                 <div style="color:#888;font-size:12px;">200关12x12迷宫 · 极限步数挑战</div>
                             </div>
                         </div>
-                        <button onclick="openEmbeddedGame('mini-games/txz.html','推箱子·深渊回响')" style="
+                        <button onclick="openEmbeddedGame('assets/games/txz.html','推箱子·深渊回响')" style="
                             background: linear-gradient(135deg, #ff9900, #cc7700);
                             border: none; color: #000; padding: 8px 16px;
                             border-radius: 15px; cursor: pointer; font-weight: bold;
@@ -10877,7 +10877,7 @@
                                 <div style="color:#888;font-size:12px;">滑动消除 · 连锁爆裂 · 时间挑战</div>
                             </div>
                         </div>
-                        <button onclick="openEmbeddedGame('mini-games/xxl.html','KILLER QUEEN · 消消乐')" style="
+                        <button onclick="openEmbeddedGame('assets/games/xxl.html','KILLER QUEEN · 消消乐')" style="
                             background: linear-gradient(135deg, #ff6688, #cc4455);
                             border: none; color: #fff; padding: 8px 16px;
                             border-radius: 15px; cursor: pointer; font-weight: bold;
@@ -13688,7 +13688,7 @@
                     
                     // 创建背景音乐音频对象
                     const bgMusic = new Audio();
-                    bgMusic.src = 'music/gamebackground.mp3';
+                    bgMusic.src = 'assets/audio/music/gamebackground.mp3';
                     bgMusic.volume = 0.2; // 降低音量，给视频声音留空间
                     bgMusic.loop = true;
                     
