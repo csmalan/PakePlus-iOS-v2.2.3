@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>推箱子·深渊回响｜墙体满布｜立体音效｜炼狱200关</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        body {
+            background: linear-gradient(145deg, #0a120c 0%, #030804 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background: #1a1a1a;
+            border-radius: 48px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
+            padding: 16px;
+            position: relative;
+            max-width: 95vw;
+        }
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            flex-direction: column;
+            transition: 0.2s;
+            color: #ffdd99;
+        }
+        .start-card {
+            background: #2e241b;
+            padding: 24px 32px;
+            border-radius: 60px;
+            text-align: center;
+            box-shadow: 0 0 30px #ffaa33;
+            border: 2px solid #ffbb55;
+            max-width: 80vw;
+        }
+        .start-card h1 {
+            font-size: 2rem;
+            margin: 0 0 8px;
+            letter-spacing: 2px;
+        }
+        .start-card p {
+            font-size: 0.9rem;
+            margin: 8px 0;
+        }
+        .start-btn {
+            background: #ff9900;
+            border: none;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 10px 28px;
+            border-radius: 60px;
+            color: #2e1f12;
+            margin-top: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #aa5500;
+            transition: 0.07s linear;
+        }
+        .start-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #aa5500; }
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #ffcc88;
+            display: none;
+        }
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+            background: #1f2a24;
+            border-radius: 28px;
+            padding: 10px;
+            box-shadow: inset 0 0 8px #00000033, 0 8px 18px rgba(0,0,0,0.3);
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 20px;
+            background-color: #d9c8a9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            width: 100%;
+            height: auto;
+        }
+        .celebration-overlay, .fail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeOut 1.2s forwards;
+        }
+        .celebration-card {
+            background: radial-gradient(circle, rgba(255,215,0,0.95) 0%, rgba(255,100,0,0.9) 100%);
+            padding: 18px 36px;
+            border-radius: 80px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px #ff4d00;
+            box-shadow: 0 0 30px gold;
+            backdrop-filter: blur(4px);
+            animation: popIn 0.4s cubic-bezier(0.34,1.2,0.64,1) forwards;
+            white-space: nowrap;
+        }
+        .fail-card {
+            background: radial-gradient(circle, rgba(180,40,40,0.95) 0%, rgba(80,0,0,0.9) 100%);
+            padding: 18px 36px;
+            border-radius: 80px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffcc88;
+            text-shadow: 0 0 8px darkred;
+            box-shadow: 0 0 30px red;
+            backdrop-filter: blur(4px);
+            animation: popIn 0.3s cubic-bezier(0.34,1.2,0.64,1) forwards;
+            white-space: nowrap;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.2); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; visibility: visible; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        .particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .info-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            background: #3a2e28e6;
+            backdrop-filter: blur(4px);
+            padding: 6px 16px;
+            border-radius: 48px;
+            margin: 10px 6px 12px;
+            color: #f7ecc7;
+            gap: 8px;
+        }
+        .level-info, .steps-box, .message-area {
+            background: #00000066;
+            padding: 4px 14px;
+            border-radius: 32px;
+            font-size: 0.9rem;
+        }
+        .level-info span, .steps-box span { color: #ffd966; font-weight: bold; }
+        .control-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 10px 0 8px;
+        }
+        .ctrl-btn {
+            background: #4e3b2f;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 5px 14px;
+            border-radius: 48px;
+            color: #f2e8cf;
+            box-shadow: 0 4px 0 #2d1f16;
+            cursor: pointer;
+        }
+        .ctrl-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #2d1f16; }
+        .dpad { margin-top: 8px; }
+        .dpad-row { display: flex; justify-content: center; gap: 16px; margin: 5px 0; }
+        .dpad-btn {
+            background: #2c3e2b;
+            width: 60px;
+            height: 60px;
+            border-radius: 60px;
+            font-size: 2rem;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 6px 0 #1a2a18;
+            cursor: pointer;
+            color: #f9e0a0;
+        }
+        .dpad-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1a2a18; }
+        @media (max-width: 550px) {
+            .dpad-btn { width: 55px; height: 55px; font-size: 1.8rem; }
+            .celebration-card, .fail-card { font-size: 1.3rem; padding: 10px 20px; white-space: nowrap; }
+            .start-card h1 { font-size: 1.5rem; }
+            .start-btn { font-size: 1rem; padding: 8px 20px; }
+        }
+        footer { text-align: center; font-size: 0.65rem; color: #cbbd8c; margin-top: 12px; }
+    </style>
+</head>
+<body>
+<div>
+    <div class="game-container" id="gameContainer">
+        <div class="start-screen" id="startScreen">
+            <div class="start-card">
+                <h1>💀 深渊回响 · 推箱子 💀</h1>
+                <p>200关 · 12x12炼狱迷宫 · 墙体遍布</p>
+                <p>极限步数 | 超限即败 | 沉浸音效</p>
+                <button class="start-btn" id="startGameBtn">🔥 坠入深渊 🔥</button>
+                <div class="loading-text" id="loadingText">⚙️ 生成铁壁关卡中... ⚙️</div>
+            </div>
+        </div>
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="480" height="480"></canvas>
+        </div>
+        <div class="info-panel">
+            <div class="level-info">🌑 第 <span id="levelCurrent">1</span> / <span id="levelTotal">200</span></div>
+            <div class="steps-box">📦 步数 <span id="stepsCurrent">0</span> / <span id="stepsLimit">0</span></div>
+            <div class="message-area" id="statusMsg">⚡ 深渊难度 | 墙体迷宫</div>
+        </div>
+        <div class="control-bar">
+            <button class="ctrl-btn" id="resetBtn">🔄 重置</button>
+            <button class="ctrl-btn" id="prevBtn">◀ 上一关</button>
+            <button class="ctrl-btn" id="nextBtn">下一关 ▶</button>
+        </div>
+        <div class="dpad">
+            <div class="dpad-row"><button class="dpad-btn" data-dir="up">▲</button></div>
+            <div class="dpad-row">
+                <button class="dpad-btn" data-dir="left">◀</button>
+                <button class="dpad-btn" data-dir="down">▼</button>
+                <button class="dpad-btn" data-dir="right">▶</button>
+            </div>
+        </div>
+        <footer>🎮 WASD / 方向键 | 每步致命 | 墙体阻路 | 立体音效</footer>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- 12x12 配置 ----------
+        const CELL_SIZE = 40;
+        const MAP_W = 12, MAP_H = 12;
+        const TILE = { WALL: 0, FLOOR: 1, TARGET: 2 };
+        
+        // 游戏状态
+        let currentLevel = 1;
+        let levelsData = [];      
+        let staticGrid = [];
+        let boxes = [];
+        let player = { x: -1, y: -1 };
+        let targetPositions = [];
+        let stepsTaken = 0;
+        let stepsLimit = 0;
+        let gameWin = false;
+        let isTransitioning = false;
+        let gameStarted = false;
+        
+        // DOM 元素
+        let canvas = document.getElementById('gameCanvas');
+        let ctx = canvas.getContext('2d');
+        const levelCurrentSpan = document.getElementById('levelCurrent');
+        const levelTotalSpan = document.getElementById('levelTotal');
+        const stepsCurrentSpan = document.getElementById('stepsCurrent');
+        const stepsLimitSpan = document.getElementById('stepsLimit');
+        const statusMsgDiv = document.getElementById('statusMsg');
+        const startScreenDiv = document.getElementById('startScreen');
+        const startBtn = document.getElementById('startGameBtn');
+        const loadingText = document.getElementById('loadingText');
+        
+        // ---------- 音效模块 (Web Audio API) ----------
+        let audioCtx = null;
+        let soundEnabled = false;
+        
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            // 静音播放一个极短音以激活 (部分浏览器需要)
+            const buffer = audioCtx.createBuffer(1, 1, 22050);
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start();
+            audioCtx.suspend(); // 先挂起，等待用户交互后恢复
+        }
+        
+        function resumeAudio() {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            soundEnabled = true;
+        }
+        
+        function playSound(type) {
+            if (!audioCtx || !soundEnabled) return;
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+                if (type === 'move') {
+                    osc.frequency.value = 660;
+                    osc.start(); osc.stop(now + 0.1);
+                } else if (type === 'push') {
+                    osc.frequency.value = 440;
+                    osc.start(); osc.stop(now + 0.12);
+                } else if (type === 'win') {
+                    // 胜利旋律：两个短音
+                    osc.frequency.value = 880;
+                    osc.start(); osc.stop(now + 0.15);
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    osc2.type = 'sine';
+                    gain2.gain.setValueAtTime(0.2, now+0.12);
+                    gain2.gain.exponentialRampToValueAtTime(0.0001, now+0.35);
+                    osc2.frequency.value = 1100;
+                    osc2.start(now+0.12); osc2.stop(now+0.3);
+                } else if (type === 'fail') {
+                    osc.frequency.value = 220;
+                    osc.start(); osc.stop(now + 0.3);
+                }
+            } catch(e) { console.warn(e); }
+        }
+        
+        // ---------- UI更新 ----------
+        function updateUI() {
+            levelCurrentSpan.innerText = currentLevel;
+            levelTotalSpan.innerText = levelsData.length;
+            stepsCurrentSpan.innerText = stepsTaken;
+            stepsLimitSpan.innerText = stepsLimit;
+            if(stepsTaken >= stepsLimit) stepsCurrentSpan.style.color = "#ff5555";
+            else if(stepsTaken > stepsLimit * 0.8) stepsCurrentSpan.style.color = "#ffaa66";
+            else stepsCurrentSpan.style.color = "#f5b642";
+        }
+        
+        function setMessage(msg, isError = false) {
+            statusMsgDiv.innerHTML = msg;
+            if (!isError && !gameWin && !isTransitioning) {
+                setTimeout(() => {
+                    if (statusMsgDiv.innerHTML === msg) 
+                        statusMsgDiv.innerHTML = '🧠 必须最优步数完成';
+                }, 1500);
+            }
+        }
+        
+        // ---------- 最优步数BFS (12x12剪枝) ----------
+        function computeOptimalSteps(staticMap, startBoxes, startPlayer, targets) {
+            const boxCount = startBoxes.length;
+            if (boxCount === 0) return 0;
+            function serialize(boxesArr, playerPos) {
+                let sorted = [...boxesArr].sort((a,b)=> (a.y*MAP_W+a.x) - (b.y*MAP_W+b.x));
+                let parts = [playerPos.x, playerPos.y];
+                for(let b of sorted) { parts.push(b.x, b.y); }
+                return parts.join(',');
+            }
+            const startState = serialize(startBoxes, startPlayer);
+            const targetSet = new Set(targets.map(t => `${t.x},${t.y}`));
+            const goalTest = (boxesArr) => boxesArr.every(b => targetSet.has(`${b.x},${b.y}`));
+            const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+            const queue = [{ boxes: startBoxes.map(b=>({x:b.x,y:b.y})), player: {x:startPlayer.x,y:startPlayer.y}, steps: 0 }];
+            const visited = new Map();
+            visited.set(startState, 0);
+            while(queue.length > 0) {
+                let { boxes: curBoxes, player: curPlayer, steps } = queue.shift();
+                if (goalTest(curBoxes)) return steps;
+                if (steps > 85) continue;
+                for(let [dx, dy] of dirs) {
+                    let nx = curPlayer.x + dx;
+                    let ny = curPlayer.y + dy;
+                    if (nx<0 || nx>=MAP_W || ny<0 || ny>=MAP_H) continue;
+                    if (staticMap[ny][nx] === TILE.WALL) continue;
+                    const boxIndex = curBoxes.findIndex(b => b.x === nx && b.y === ny);
+                    if (boxIndex !== -1) {
+                        const pushX = nx + dx;
+                        const pushY = ny + dy;
+                        if (pushX<0 || pushX>=MAP_W || pushY<0 || pushY>=MAP_H) continue;
+                        if (staticMap[pushY][pushX] === TILE.WALL) continue;
+                        if (curBoxes.some(b => b.x === pushX && b.y === pushY)) continue;
+                        let newBoxes = curBoxes.map((b, idx) => idx === boxIndex ? {x: pushX, y: pushY} : {x: b.x, y: b.y});
+                        let newPlayer = {x: nx, y: ny};
+                        let stateKey = serialize(newBoxes, newPlayer);
+                        if (!visited.has(stateKey)) {
+                            visited.set(stateKey, steps+1);
+                            queue.push({ boxes: newBoxes, player: newPlayer, steps: steps+1 });
+                        }
+                    } else {
+                        let newPlayer = {x: nx, y: ny};
+                        let stateKey = serialize(curBoxes, newPlayer);
+                        if (!visited.has(stateKey)) {
+                            visited.set(stateKey, steps+1);
+                            queue.push({ boxes: curBoxes, player: newPlayer, steps: steps+1 });
+                        }
+                    }
+                }
+            }
+            return -1;
+        }
+        
+        // ---------- 失败动画 & 重置 ----------
+        function playFailAnimationAndReset() {
+            if(isTransitioning) return;
+            isTransitioning = true;
+            playSound('fail');
+            const overlay = document.createElement('div');
+            overlay.className = 'fail-overlay';
+            const card = document.createElement('div');
+            card.className = 'fail-card';
+            card.innerText = `💀 步数超限 💀`;
+            overlay.appendChild(card);
+            document.body.appendChild(overlay);
+            document.body.style.animation = 'shake 0.3s ease-in-out 0s 2';
+            setTimeout(() => { document.body.style.animation = ''; }, 400);
+            setTimeout(() => {
+                if(overlay && overlay.parentNode) overlay.remove();
+                if(levelsData.length) {
+                    const level = levelsData[currentLevel-1];
+                    staticGrid = level.staticMap.map(row => [...row]);
+                    boxes = level.initBoxes.map(b => ({x: b.x, y: b.y}));
+                    player = {x: level.initPlayer.x, y: level.initPlayer.y};
+                    targetPositions = level.initTargets.map(t => ({x: t.x, y: t.y}));
+                    stepsTaken = 0;
+                    gameWin = false;
+                    stepsLimit = level.optimalSteps;
+                    updateUI();
+                    setMessage(`↺ 失败重置，必须正好 ${stepsLimit} 步`, true);
+                    drawCanvas();
+                }
+                isTransitioning = false;
+            }, 1000);
+        }
+        
+        function addStep() {
+            if(gameWin || isTransitioning || !gameStarted) return;
+            stepsTaken++;
+            updateUI();
+            if(stepsTaken > stepsLimit) {
+                playFailAnimationAndReset();
+            }
+        }
+        
+        function resetCurrentLevel() {
+            if(isTransitioning || !gameStarted) return;
+            if(levelsData.length === 0) return;
+            const level = levelsData[currentLevel-1];
+            staticGrid = level.staticMap.map(row => [...row]);
+            boxes = level.initBoxes.map(b => ({x: b.x, y: b.y}));
+            player = {x: level.initPlayer.x, y: level.initPlayer.y};
+            targetPositions = level.initTargets.map(t => ({x: t.x, y: t.y}));
+            stepsTaken = 0;
+            gameWin = false;
+            stepsLimit = level.optimalSteps;
+            updateUI();
+            setMessage(`↺ 手动重置`);
+            drawCanvas();
+        }
+        
+        function checkVictory() {
+            for(let target of targetPositions) {
+                if(!boxes.some(b => b.x === target.x && b.y === target.y)) return false;
+            }
+            return true;
+        }
+        
+        function clearAnimations() {
+            document.querySelectorAll('.celebration-overlay, .fail-overlay, .particle-canvas').forEach(el => el.remove());
+        }
+        
+        function playVictoryAndNext() {
+            if(isTransitioning) return;
+            isTransitioning = true;
+            gameWin = true;
+            playSound('win');
+            clearAnimations();
+            const overlay = document.createElement('div');
+            overlay.className = 'celebration-overlay';
+            const card = document.createElement('div');
+            card.className = 'celebration-card';
+            card.innerText = `✨ 完美 ${stepsLimit} 步！ ✨`;
+            overlay.appendChild(card);
+            document.body.appendChild(overlay);
+            
+            const particleCanvas = document.createElement('canvas');
+            particleCanvas.className = 'particle-canvas';
+            document.body.appendChild(particleCanvas);
+            const pCtx = particleCanvas.getContext('2d');
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+            let particles = [];
+            for(let i=0;i<140;i++) {
+                particles.push({
+                    x: Math.random() * particleCanvas.width,
+                    y: Math.random() * particleCanvas.height,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.5) * 12 - 6,
+                    life: 1,
+                    size: 3+Math.random()*14,
+                    color: `hsl(${Math.random()*60 + 30}, 100%, 60%)`
+                });
+            }
+            let animFrame;
+            function drawParticles() {
+                pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                let allDead = true;
+                for(let p of particles) {
+                    if(p.life <= 0) continue;
+                    allDead = false;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.2;
+                    p.life -= 0.015;
+                    pCtx.globalAlpha = p.life;
+                    pCtx.fillStyle = p.color;
+                    pCtx.beginPath();
+                    pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2);
+                    pCtx.fill();
+                }
+                if(allDead) {
+                    cancelAnimationFrame(animFrame);
+                    if(particleCanvas && particleCanvas.parentNode) particleCanvas.remove();
+                } else {
+                    animFrame = requestAnimationFrame(drawParticles);
+                }
+            }
+            drawParticles();
+            setTimeout(() => {
+                if(overlay && overlay.parentNode) overlay.remove();
+                setTimeout(() => {
+                    if(currentLevel < levelsData.length) {
+                        currentLevel++;
+                        loadLevel(currentLevel);
+                    } else {
+                        setMessage("🏆 地狱通关！你是魔神！");
+                        gameWin = true;
+                        isTransitioning = false;
+                    }
+                    isTransitioning = false;
+                }, 100);
+            }, 1300);
+        }
+        
+        function victoryAction() {
+            if(gameWin || isTransitioning || !gameStarted) return;
+            playVictoryAndNext();
+        }
+        
+        function tryMove(dx, dy) {
+            if(gameWin || isTransitioning || !gameStarted) return false;
+            const nx = player.x + dx;
+            const ny = player.y + dy;
+            if(staticGrid[ny][nx] === TILE.WALL) return false;
+            const boxIndex = boxes.findIndex(b => b.x === nx && b.y === ny);
+            if(boxIndex !== -1) {
+                const pushX = nx + dx, pushY = ny + dy;
+                if(staticGrid[pushY][pushX] === TILE.WALL) return false;
+                if(boxes.some(b => b.x === pushX && b.y === pushY)) return false;
+                boxes[boxIndex] = { x: pushX, y: pushY };
+                player = { x: nx, y: ny };
+                addStep();
+                playSound('push');
+                drawCanvas();
+                if(checkVictory()) victoryAction();
+                return true;
+            } else {
+                player = { x: nx, y: ny };
+                addStep();
+                playSound('move');
+                drawCanvas();
+                return true;
+            }
+        }
+        
+        function nextLevel() {
+            if(isTransitioning || !gameStarted) return;
+            if(currentLevel < levelsData.length) {
+                currentLevel++;
+                loadLevel(currentLevel);
+                updateUI();
+            } else setMessage("已是最后一关", true);
+            drawCanvas();
+        }
+        function prevLevel() {
+            if(isTransitioning || !gameStarted) return;
+            if(currentLevel > 1) {
+                currentLevel--;
+                loadLevel(currentLevel);
+                updateUI();
+            } else setMessage("已在第一关", true);
+            drawCanvas();
+        }
+        
+        function loadLevel(levelIdx) {
+            clearAnimations();
+            isTransitioning = false;
+            const level = levelsData[levelIdx-1];
+            staticGrid = level.staticMap.map(row => [...row]);
+            boxes = level.initBoxes.map(b => ({x: b.x, y: b.y}));
+            player = {x: level.initPlayer.x, y: level.initPlayer.y};
+            targetPositions = level.initTargets.map(t => ({x: t.x, y: t.y}));
+            stepsTaken = 0;
+            gameWin = false;
+            stepsLimit = level.optimalSteps;
+            updateUI();
+            setMessage(`🗝️ 第${levelIdx}关 · 地狱步限 ${stepsLimit}`);
+            drawCanvas();
+        }
+        
+        // ---------- 高难度关卡生成 (保证墙体充足，无空白关卡) ----------
+        function generateHellishLevels() {
+            const MIN_INTERIOR_WALLS = 6;  // 内部墙体至少6块
+            const levels = [];
+            for(let idx = 1; idx <= 200; idx++) {
+                let success = false;
+                let attempts = 0;
+                while (!success && attempts < 12) {
+                    attempts++;
+                    let staticMap = Array(MAP_H).fill().map(() => Array(MAP_W).fill(TILE.FLOOR));
+                    for(let i=0;i<MAP_W;i++) staticMap[0][i] = staticMap[MAP_H-1][i] = TILE.WALL;
+                    for(let i=0;i<MAP_H;i++) staticMap[i][0] = staticMap[i][MAP_W-1] = TILE.WALL;
+                    
+                    let t = (idx-1)/199;
+                    let density = 0.22 + t * 0.38;  // 墙体密度 22% → 60%
+                    let boxCount = 1;
+                    if(idx > 25) boxCount = 2;
+                    if(idx > 70) boxCount = 3;
+                    if(idx > 130) boxCount = 4;
+                    
+                    // 生成内部墙体
+                    let interior = [];
+                    for(let y=1; y<MAP_H-1; y++) for(let x=1; x<MAP_W-1; x++) interior.push({x,y});
+                    for(let i=interior.length-1; i>0; i--) {
+                        let r = Math.floor(Math.random() * (i+1));
+                        [interior[i], interior[r]] = [interior[r], interior[i]];
+                    }
+                    let wallCount = Math.floor(interior.length * density);
+                    for(let i=0; i<wallCount; i++) {
+                        let cell = interior[i];
+                        staticMap[cell.y][cell.x] = TILE.WALL;
+                    }
+                    
+                    // 确保墙体数量足够
+                    let interiorWallCount = 0;
+                    for(let y=1; y<MAP_H-1; y++) for(let x=1; x<MAP_W-1; x++) if(staticMap[y][x] === TILE.WALL) interiorWallCount++;
+                    if(interiorWallCount < MIN_INTERIOR_WALLS) {
+                        let need = MIN_INTERIOR_WALLS - interiorWallCount;
+                        for(let i=0; i<need && i<interior.length; i++) {
+                            let cell = interior[i];
+                            if(staticMap[cell.y][cell.x] !== TILE.WALL) staticMap[cell.y][cell.x] = TILE.WALL;
+                        }
+                    }
+                    
+                    // 收集可行走格
+                    let walkable = [];
+                    for(let y=1; y<MAP_H-1; y++) for(let x=1; x<MAP_W-1; x++) if(staticMap[y][x] !== TILE.WALL) walkable.push({x,y});
+                    if(walkable.length < boxCount*2 + 3) continue;
+                    
+                    // 打乱walkable
+                    for(let i=walkable.length-1; i>0; i--) { let r=Math.floor(Math.random()*(i+1)); [walkable[i], walkable[r]] = [walkable[r], walkable[i]]; }
+                    let targets = [];
+                    for(let i=0; i<boxCount && i<walkable.length; i++) targets.push({...walkable[i]});
+                    // 分散目标点
+                    for(let i=1; i<targets.length; i++) {
+                        let better = walkable.find(p => targets.every(t => Math.abs(p.x-t.x)+Math.abs(p.y-t.y) >= 3) && !targets.some(t=>t.x===p.x && t.y===p.y));
+                        if(better) targets[i] = better;
+                    }
+                    // 箱子位置：距离目标2~5格
+                    let boxesPos = [];
+                    for(let ti=0; ti<targets.length; ti++) {
+                        let target = targets[ti];
+                        let candidates = [];
+                        for(let dy=-4; dy<=4; dy++) for(let dx=-4; dx<=4; dx++) {
+                            let x = target.x+dx, y = target.y+dy;
+                            if(x>=1 && x<MAP_W-1 && y>=1 && y<MAP_H-1 && staticMap[y][x] !== TILE.WALL && !(x===target.x && y===target.y) && !targets.some(t=>t.x===x && t.y===y)) {
+                                let dist = Math.abs(dx)+Math.abs(dy);
+                                if(dist>=2 && dist<=5) candidates.push({x,y,dist});
+                            }
+                        }
+                        if(candidates.length === 0) boxesPos.push({x: target.x+1, y: target.y});
+                        else { candidates.sort((a,b)=> b.dist - a.dist); boxesPos.push({x:candidates[0].x, y:candidates[0].y}); }
+                    }
+                    // 玩家最远
+                    let playerCandidates = walkable.filter(p => !boxesPos.some(b=>b.x===p.x && b.y===p.y) && !targets.some(t=>t.x===p.x && t.y===p.y));
+                    if(playerCandidates.length === 0) playerCandidates = walkable;
+                    let bestPlayer = playerCandidates[0];
+                    let maxDist = -1;
+                    for(let pc of playerCandidates) {
+                        let minDistToBox = Math.min(...boxesPos.map(b=>Math.abs(b.x-pc.x)+Math.abs(b.y-pc.y)));
+                        if(minDistToBox > maxDist) { maxDist = minDistToBox; bestPlayer = pc; }
+                    }
+                    for(let t of targets) staticMap[t.y][t.x] = TILE.TARGET;
+                    let opt = computeOptimalSteps(staticMap, boxesPos, bestPlayer, targets);
+                    if(opt !== -1 && opt <= 85) {
+                        levels.push({ staticMap, initBoxes:boxesPos, initPlayer:bestPlayer, initTargets:targets, optimalSteps:opt });
+                        success = true;
+                    }
+                }
+                if (!success) {
+                    // 最后保底：坚固的简单关卡
+                    let simpleMap = Array(MAP_H).fill().map(()=>Array(MAP_W).fill(TILE.FLOOR));
+                    for(let i=0;i<MAP_W;i++) simpleMap[0][i]=simpleMap[MAP_H-1][i]=TILE.WALL;
+                    for(let i=0;i<MAP_H;i++) simpleMap[i][0]=simpleMap[i][MAP_W-1]=TILE.WALL;
+                    // 加一些墙
+                    for(let y=2; y<=9; y++) simpleMap[y][5] = TILE.WALL;
+                    for(let x=3; x<=8; x++) simpleMap[7][x] = TILE.WALL;
+                    let target = {x:10, y:6};
+                    let box = {x:7, y:6};
+                    let player = {x:7, y:5};
+                    simpleMap[target.y][target.x]=TILE.TARGET;
+                    let opt = computeOptimalSteps(simpleMap, [box], player, [target]);
+                    if(opt<4) opt=5;
+                    levels.push({ staticMap: simpleMap, initBoxes:[box], initPlayer:player, initTargets:[target], optimalSteps:opt });
+                }
+            }
+            return levels;
+        }
+        
+        // ---------- 绘图 (12x12) ----------
+        function drawCanvas() {
+            if(!gameStarted && levelsData.length===0) {
+                canvas.width = MAP_W*CELL_SIZE;
+                canvas.height = MAP_H*CELL_SIZE;
+                ctx.fillStyle = "#2b2b2b";
+                ctx.fillRect(0,0,canvas.width,canvas.height);
+                ctx.fillStyle = "#ffdd99";
+                ctx.font = "20px monospace";
+                ctx.fillText("点击开始", canvas.width/2-60, canvas.height/2);
+                return;
+            }
+            canvas.width = MAP_W * CELL_SIZE;
+            canvas.height = MAP_H * CELL_SIZE;
+            for(let row=0; row<MAP_H; row++) {
+                for(let col=0; col<MAP_W; col++) {
+                    let x = col*CELL_SIZE, y = row*CELL_SIZE;
+                    let tile = staticGrid[row][col];
+                    if(tile === TILE.WALL) {
+                        ctx.fillStyle = "#4a3727";
+                        ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.fillStyle = "#2e2018";
+                        ctx.fillRect(x+2, y+2, CELL_SIZE-4, CELL_SIZE-4);
+                        ctx.fillStyle = "#6b4c35";
+                        ctx.fillRect(x+5, y+5, CELL_SIZE-10, CELL_SIZE-10);
+                        ctx.fillStyle = "#b87c4a";
+                        ctx.fillRect(x+10, y+10, 4, 4);
+                        ctx.fillRect(x+CELL_SIZE-14, y+10, 4, 4);
+                        ctx.fillRect(x+10, y+CELL_SIZE-14, 4, 4);
+                        ctx.fillRect(x+CELL_SIZE-14, y+CELL_SIZE-14, 4, 4);
+                    } else if(tile === TILE.FLOOR) {
+                        ctx.fillStyle = "#ecd9b4";
+                        ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.fillStyle = "#dbbc87";
+                        ctx.fillRect(x+1, y+1, CELL_SIZE-2, CELL_SIZE-2);
+                        ctx.strokeStyle = "#c0a16b";
+                        ctx.strokeRect(x+0.5, y+0.5, CELL_SIZE, CELL_SIZE);
+                    } else if(tile === TILE.TARGET) {
+                        ctx.fillStyle = "#f7cf8c";
+                        ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.fillStyle = "#ffb347";
+                        ctx.fillRect(x+2, y+2, CELL_SIZE-4, CELL_SIZE-4);
+                        ctx.font = `${CELL_SIZE*0.4}px monospace`;
+                        ctx.fillStyle = "#c44900";
+                        ctx.fillText("⭐", x+CELL_SIZE*0.25, y+CELL_SIZE*0.75);
+                        ctx.fillStyle = "#ffdf80";
+                        ctx.fillText("⭐", x+CELL_SIZE*0.22, y+CELL_SIZE*0.72);
+                    }
+                }
+            }
+            for(let box of boxes) {
+                let x = box.x*CELL_SIZE, y = box.y*CELL_SIZE;
+                let onTarget = (staticGrid[box.y][box.x] === TILE.TARGET);
+                if(onTarget) {
+                    ctx.fillStyle = "#c9863c";
+                    ctx.fillRect(x+4, y+4, CELL_SIZE-8, CELL_SIZE-8);
+                    ctx.fillStyle = "#e5a144";
+                    ctx.fillRect(x+6, y+6, CELL_SIZE-12, CELL_SIZE-12);
+                    ctx.fillStyle = "#ffd966";
+                    ctx.fillText("📦", x+CELL_SIZE*0.25, y+CELL_SIZE*0.75);
+                } else {
+                    ctx.fillStyle = "#8b5a2b";
+                    ctx.fillRect(x+3, y+3, CELL_SIZE-6, CELL_SIZE-6);
+                    ctx.fillStyle = "#b87c3a";
+                    ctx.fillRect(x+5, y+5, CELL_SIZE-10, CELL_SIZE-10);
+                    ctx.fillStyle = "#d49547";
+                    ctx.fillRect(x+7, y+7, CELL_SIZE-14, CELL_SIZE-14);
+                    ctx.fillStyle = "#a7652b";
+                    ctx.fillText("📦", x+CELL_SIZE*0.27, y+CELL_SIZE*0.73);
+                }
+            }
+            let px = player.x*CELL_SIZE, py = player.y*CELL_SIZE;
+            let onTargetPlayer = (staticGrid[player.y][player.x] === TILE.TARGET);
+            ctx.fillStyle = onTargetPlayer ? "#fed54e" : "#5da0e0";
+            ctx.beginPath();
+            ctx.arc(px+CELL_SIZE/2, py+CELL_SIZE/2, CELL_SIZE*0.28, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(px+CELL_SIZE*0.35, py+CELL_SIZE*0.35, CELL_SIZE*0.07, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px+CELL_SIZE*0.65, py+CELL_SIZE*0.35, CELL_SIZE*0.07, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#3b2a1f";
+            ctx.beginPath();
+            ctx.arc(px+CELL_SIZE*0.5, py+CELL_SIZE*0.55, CELL_SIZE*0.06, 0, Math.PI);
+            ctx.fill();
+            ctx.fillStyle = "#ff884d";
+            ctx.fillRect(px+CELL_SIZE*0.35, py+CELL_SIZE*0.7, CELL_SIZE*0.3, CELL_SIZE*0.08);
+            if(onTargetPlayer) {
+                ctx.fillStyle = "#ffbf40";
+                ctx.font = `${CELL_SIZE*0.25}px monospace`;
+                ctx.fillText("✨", px+CELL_SIZE*0.75, py+CELL_SIZE*0.25);
+            }
+        }
+        
+        // 震动动画
+        const styleShake = document.createElement('style');
+        styleShake.textContent = `@keyframes shake { 0% { transform: translate(1px,1px); } 25% { transform: translate(-1px,-2px); } 50% { transform: translate(-2px,1px); } 75% { transform: translate(2px,2px); } 100% { transform: translate(0,0); } }`;
+        document.head.appendChild(styleShake);
+        
+        function attachButtonOnce(btn, handler) {
+            btn.addEventListener('click', (e) => { e.preventDefault(); handler(); });
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); handler(); });
+        }
+        
+        function initGameEvents() {
+            window.addEventListener('keydown', (e) => {
+                if(!gameStarted || isTransitioning) { e.preventDefault(); return; }
+                const key = e.key;
+                let dx=0, dy=0;
+                if(key === 'ArrowUp' || key === 'w' || key === 'W') { dx=0; dy=-1; }
+                else if(key === 'ArrowDown' || key === 's' || key === 'S') { dx=0; dy=1; }
+                else if(key === 'ArrowLeft' || key === 'a' || key === 'A') { dx=-1; dy=0; }
+                else if(key === 'ArrowRight' || key === 'd' || key === 'D') { dx=1; dy=0; }
+                else if(key === 'r' || key === 'R') { resetCurrentLevel(); e.preventDefault(); return; }
+                else if(key === 'n' || key === 'N') { nextLevel(); e.preventDefault(); return; }
+                else if(key === 'p' || key === 'P') { prevLevel(); e.preventDefault(); return; }
+                else return;
+                e.preventDefault();
+                if(dx !== 0 || dy !== 0) tryMove(dx, dy);
+            });
+            document.querySelectorAll('.dpad-btn').forEach(btn => {
+                const dir = btn.getAttribute('data-dir');
+                let moveHandler;
+                if(dir === 'up') moveHandler = () => tryMove(0,-1);
+                else if(dir === 'down') moveHandler = () => tryMove(0,1);
+                else if(dir === 'left') moveHandler = () => tryMove(-1,0);
+                else moveHandler = () => tryMove(1,0);
+                attachButtonOnce(btn, moveHandler);
+            });
+            attachButtonOnce(document.getElementById('resetBtn'), () => resetCurrentLevel());
+            attachButtonOnce(document.getElementById('prevBtn'), () => prevLevel());
+            attachButtonOnce(document.getElementById('nextBtn'), () => nextLevel());
+        }
+        
+        // 启动游戏
+        async function startGame() {
+            if(gameStarted) return;
+            initAudio();            // 初始化音频上下文
+            resumeAudio();         // 用户点击开始，立即恢复音频
+            loadingText.style.display = "block";
+            startBtn.disabled = true;
+            setTimeout(() => {
+                try {
+                    levelsData = generateHellishLevels();
+                    if(levelsData.length !== 200) console.warn("关卡数量异常", levelsData.length);
+                    gameStarted = true;
+                    startScreenDiv.style.display = 'none';
+                    loadLevel(1);
+                    initGameEvents();
+                    drawCanvas();
+                } catch(e) {
+                    console.error(e);
+                    alert("关卡生成失败，请刷新重试");
+                    loadingText.style.display = "none";
+                    startBtn.disabled = false;
+                }
+            }, 50);
+        }
+        
+        startBtn.addEventListener('click', startGame);
+        drawCanvas();
+        canvas.addEventListener('touchstart', e => e.preventDefault());
+        document.querySelectorAll('button').forEach(btn => btn.addEventListener('touchstart', e => e.preventDefault()));
+    })();
+</script>
+</body>
+</html>
